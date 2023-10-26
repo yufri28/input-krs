@@ -153,7 +153,7 @@
                     <!--begin::Mobile logo-->
                     <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
                         <a href="http://localhost/kepegawaian/admin/index.php" class="d-lg-none">
-                            <img alt="Logo" src="<?=base_url()?>assets/templates/media/logos/logo-UCB.png"
+                            <img alt="Logo" src="<?=base_url()?>assets/templates/media/logos/logo-ucb-ok.png"
                                 class="h-30px" />
                         </a>
                     </div>
