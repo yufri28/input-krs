@@ -5,8 +5,7 @@
           <!--begin::Copyright-->
           <div class="text-dark order-2 order-md-1">
               <span class="text-muted fw-bold me-1">2023©</span>
-              <a href="https://www.UCB.or.id/yayasan/" target="_blank"
-                  class="text-gray-800 text-hover-primary">UCB</a>
+              <a href="https://www.UCB.or.id/yayasan/" target="_blank" class="text-gray-800 text-hover-primary">UCB</a>
           </div>
           <!--end::Copyright-->
       </div>
@@ -75,76 +74,132 @@ $(document).ready(function() {
 });
   </script>
   <!-- end::select2 -->
-
-
   <script>
 $(document).ready(function() {
-    setInterval(() => {
-        $.ajax({
-            url: "<?= base_url('home/count_notifications'); ?>",
-            type: "POST",
-            datatype: "json",
-            data: {},
-            success: function(response) {
-                var dataObj = JSON.parse(response);
-                var jumlahNotifikasi = dataObj.jumlah_notifikasi;
-                var dataNotif = dataObj.dataNotif;
-
-                if (dataNotif.length > 0) {
-                    $('#jumlah_notif').html(jumlahNotifikasi);
-                    const waktu_notifikasi = dataNotif[jumlahNotifikasi - 1].create_at;
-                    const waktuSaatIni = new Date();
-                    const waktuDariDatabase = new Date(waktu_notifikasi);
-                    const selisihWaktu = (waktuSaatIni - waktuDariDatabase) / 1000;
-                    if (selisihWaktu < 3) {
-                        showNotification("Anda memiliki notifikasi baru.");
-                        var audio = document.getElementById("audioplay").autoplay = true;
-                    }
-                    var container = $('.scroll-y.mh-325px.my-5.px-8');
-                    container.empty();
-
-                    $.each(dataNotif, function(key, notif) {
-                        var itemHTML = `
-                            <!--begin::Item-->
-                            <div class="d-flex flex-stack py-4">
-                                <!--begin::Section-->
-                                <div class="d-flex align-items-center me-2">
-                                    <!--begin::Code-->
-                                    <span class="w-70px badge badge-light-success me-4">200 OK</span>
-                                    <!--end::Code-->
-                                    <!--begin::Title-->
-                                    <a href="#" class="text-gray-800 text-hover-primary fw-bold">${notif.isi_notifikasi}</a>
-                                    <!--end::Title-->
-                                </div>
-                                <!--end::Section-->
-                                <!--begin::Label-->
-                                <span class="badge badge-light fs-8">Just now</span>
-                                <!--end::Label-->
-                            </div>
-                            <!--end::Item-->
-                        `;
-                        container.append(itemHTML);
-                    });
-                }
-
-            },
+    // Menghitung jumlah SKS yang dipilih
+    function hitungTotalSKS() {
+        let totalSKS = 0;
+        $('input[type="checkbox"]:checked').each(function() {
+            const sks = parseInt($(this).data("sks"));
+            totalSKS += sks;
         });
-    }, 2000);
+        return totalSKS;
+    }
 
-    function showNotification(message) {
-        if ('Notification' in window) {
-            Notification.requestPermission(function(permission) {
-                if (permission === 'granted') {
-                    var notification = new Notification('Notifikasi', {
-                        body: message,
-                        icon: 'icon.png'
-                    });
-                }
+    // Memeriksa total SKS saat kotak centang berubah
+    $('input[type="checkbox"]').change(function() {
+        const totalSKS = hitungTotalSKS();
+        console.log(totalSKS)
+        if (totalSKS > 24) {
+            Swal.fire({
+                title: 'Warning!',
+                text: 'Jumlah SKS tidak boleh lebih dari 24 SKS',
+                icon: 'warning',
+                confirmButtonText: 'OK'
             });
+            // Batalkan tindakan yang menyebabkan total SKS melebihi batas
+            $(this).prop('checked', false);
+        }
+        // Simpan status centang dalam localStorage
+        const checkboxStatus = {};
+        $('input[type="checkbox"]').each(function() {
+            checkboxStatus[$(this).val()] = $(this).prop('checked');
+        });
+        localStorage.setItem('checkboxStatus', JSON.stringify(checkboxStatus));
+    });
+    // Mengembalikan status centang dari localStorage saat halaman dimuat
+    const storedStatus = localStorage.getItem('checkboxStatus');
+    if (storedStatus) {
+        const checkboxStatus = JSON.parse(storedStatus);
+        for (const key in checkboxStatus) {
+            if (checkboxStatus.hasOwnProperty(key) && checkboxStatus[key]) {
+                $(`input[type="checkbox"][value="${key}"]`).prop('checked', true);
+            }
         }
     }
+
+    // Menghapus centang pada semua kotak centang saat data disubmit
+    // $('#formSubmitButton').click(function() {
+    //     $('input[type="checkbox"]').prop('checked', false);
+    // });
+
+    // Menghapus semua centang saat tombol "Simpan KRS" diklik
+    // $("button[type='submit']").click(function() {
+    //     $('input[type="checkbox"]').prop('checked', false);
+    //     localStorage.removeItem('checkboxStatus'); // Hapus status centang dari localStorage
+    // });
 });
   </script>
+
+  <script>
+// $(document).ready(function() {
+//     setInterval(() => {
+//         $.ajax({
+//             url: "<?= base_url('home/count_notifications'); ?>",
+//             type: "POST",
+//             datatype: "json",
+//             data: {},
+//             success: function(response) {
+//                 var dataObj = JSON.parse(response);
+//                 var jumlahNotifikasi = dataObj.jumlah_notifikasi;
+//                 var dataNotif = dataObj.dataNotif;
+
+//                 if (dataNotif.length > 0) {
+//                     $('#jumlah_notif').html(jumlahNotifikasi);
+//                     const waktu_notifikasi = dataNotif[jumlahNotifikasi - 1].create_at;
+//                     const waktuSaatIni = new Date();
+//                     const waktuDariDatabase = new Date(waktu_notifikasi);
+//                     const selisihWaktu = (waktuSaatIni - waktuDariDatabase) / 1000;
+//                     if (selisihWaktu < 3) {
+//                         showNotification("Anda memiliki notifikasi baru.");
+//                         var audio = document.getElementById("audioplay").autoplay = true;
+//                     }
+//                     var container = $('.scroll-y.mh-325px.my-5.px-8');
+//                     container.empty();
+
+//                     $.each(dataNotif, function(key, notif) {
+//                         var itemHTML = `
+//                             <!--begin::Item-->
+//                             <div class="d-flex flex-stack py-4">
+//                                 <!--begin::Section-->
+//                                 <div class="d-flex align-items-center me-2">
+//                                     <!--begin::Code-->
+//                                     <span class="w-70px badge badge-light-success me-4">200 OK</span>
+//                                     <!--end::Code-->
+//                                     <!--begin::Title-->
+//                                     <a href="#" class="text-gray-800 text-hover-primary fw-bold">${notif.isi_notifikasi}</a>
+//                                     <!--end::Title-->
+//                                 </div>
+//                                 <!--end::Section-->
+//                                 <!--begin::Label-->
+//                                 <span class="badge badge-light fs-8">Just now</span>
+//                                 <!--end::Label-->
+//                             </div>
+//                             <!--end::Item-->
+//                         `;
+//                         container.append(itemHTML);
+//                     });
+//                 }
+
+//             },
+//         });
+//     }, 2000);
+
+//     function showNotification(message) {
+//         if ('Notification' in window) {
+//             Notification.requestPermission(function(permission) {
+//                 if (permission === 'granted') {
+//                     var notification = new Notification('Notifikasi', {
+//                         body: message,
+//                         icon: 'icon.png'
+//                     });
+//                 }
+//             });
+//         }
+//     }
+// });
+  </script>
+
   <!--end::Javascript-->
   </body>
   <!--end::Body-->
